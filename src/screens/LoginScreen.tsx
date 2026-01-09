@@ -8,6 +8,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -84,9 +85,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             style={styles.header}
           >
             <View style={styles.logoContainer}>
-              <View style={styles.logoCircle}>
-                <Text style={styles.logoEmoji}>🎓</Text>
-              </View>
+              <Image
+                source={require('../../assets/Logo.png')}
+                style={styles.logoImage}
+                resizeMode="contain"
+              />
               <Text style={styles.logoText}>CampusCircle</Text>
             </View>
             <Text style={styles.title}>Sign in to your</Text>
@@ -194,6 +197,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: SPACING.xl,
+  },
+  logoImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: SPACING.sm,
   },
   logoCircle: {
     width: 32,

@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Image,
   ViewToken,
+  ImageSourcePropType,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,25 +20,31 @@ import { RootStackParamList, OnboardingSlide } from '../types';
 
 const { width, height } = Dimensions.get('window');
 
-// Placeholder images - replace with actual assets
+// Onboarding images
+const onboardingImages: { [key: number]: ImageSourcePropType } = {
+  1: require('../../assets/onboarding1.png'),
+  2: require('../../assets/onboarding2.png'),
+  3: require('../../assets/onboarding3.png'),
+};
+
 const slides: OnboardingSlide[] = [
   {
     id: 1,
     title: 'Discuss Freely:',
     description: 'Join academic and social channels without revealing your real name.',
-    image: "../../assets/onboarding1.png", // Will use placeholder
+    image: onboardingImages[1],
   },
   {
     id: 2,
     title: 'Stay Informed:',
     description: 'Explore trending topics and campus insights in real-time',
-    image: "../../assets/onboarding2.png",
+    image: onboardingImages[2],
   },
   {
     id: 3,
     title: 'Build Reputation:',
     description: 'Earn karma, badges, and trust as a helpful community member.',
-    image: "../../assets/onboarding3.png",
+    image: onboardingImages[3],
   },
 ];
 
@@ -79,14 +86,11 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ navigation }) => {
   const renderSlide = ({ item, index }: { item: OnboardingSlide; index: number }) => (
     <View style={styles.slide}>
       <View style={styles.imageContainer}>
-        <View style={styles.imagePlaceholder}>
-          {/* Placeholder illustration */}
-          <View style={styles.illustrationCircle}>
-            <Text style={styles.illustrationEmoji}>
-              {index === 0 ? '💬' : index === 1 ? '📱' : '🏆'}
-            </Text>
-          </View>
-        </View>
+        <Image
+          source={item.image}
+          style={styles.slideImage}
+          resizeMode="contain"
+        />
       </View>
       <Text style={styles.title}>{item.title}</Text>
       <Text style={styles.description}>{item.description}</Text>
@@ -182,6 +186,11 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.xxl,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  slideImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: BORDER_RADIUS.xxl,
   },
   imagePlaceholder: {
     width: '100%',

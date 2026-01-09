@@ -265,7 +265,8 @@ export interface LeaderboardUser {
   id: number;
   username: string;
   profilePictureUrl?: string;
-  totalKarma: number;
+  totalUpvotes?: number;
+  totalKarma?: number;
   postKarma?: number;
   commentKarma?: number;
   rank?: number;

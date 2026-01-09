@@ -8,6 +8,7 @@ import {
   Platform,
   ScrollView,
   Alert,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -117,6 +118,7 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ navigation }) => {
               <Ionicons name="arrow-back" size={24} color={COLORS.white} />
             </TouchableOpacity>
 
+
             <Text style={styles.title}>Register</Text>
             <TouchableOpacity
               style={styles.loginLink}
@@ -218,6 +220,15 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'center',
     marginBottom: SPACING.md,
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  logoImage: {
+    width: 20,
+    height: 20,
+    borderRadius: 40,
   },
   title: {
     fontSize: FONT_SIZES.title,

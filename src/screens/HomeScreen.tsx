@@ -131,7 +131,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
         {item.username}
       </Text>
       <Text style={styles.contributorKarma}>
-        {item.totalKarma.toLocaleString()} karma
+        {(item.totalUpvotes || item.totalKarma || 0).toLocaleString()} upvotes
       </Text>
     </TouchableOpacity>
   );
@@ -321,6 +321,7 @@ const styles = StyleSheet.create({
   contributorItem: {
     alignItems: 'center',
     marginRight: SPACING.lg,
+    marginTop: SPACING.sm,
   },
   contributorName: {
     marginTop: SPACING.sm,
