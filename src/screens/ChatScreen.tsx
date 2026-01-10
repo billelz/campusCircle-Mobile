@@ -42,6 +42,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
   const recipient = recipientUsername || participantName;
 
   const fetchMessages = async () => {
+    if (!conversationId) return;
     try {
       const conversation = await messageService.getConversationById(conversationId);
       if (conversation.messages?.length > 0) {
@@ -87,7 +88,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
     // Connect to WebSocket if user is available
     if (user?.username) {
       websocketService.connect(user.username).catch(console.error);
-      
+
       // Register message callback
       websocketService.onMessage('chat-screen', handleWebSocketMessage);
       websocketService.onTyping('chat-screen', handleTypingIndicator);
@@ -105,18 +106,18 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
   const handleTextChange = (text: string) => {
     setInputText(text);
-    
+
     // Send typing indicator via WebSocket
     if (text.length > 0 && !isTyping && recipient) {
       setIsTyping(true);
       websocketService.sendTypingIndicator(recipient, true);
     }
-    
+
     // Clear previous timeout
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
-    
+
     // Stop typing indicator after 2 seconds of no input
     typingTimeoutRef.current = setTimeout(() => {
       if (isTyping && recipient) {
@@ -152,9 +153,11 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       if (websocketService.isConnected() && recipient) {
         websocketService.sendMessage(recipient, messageText);
       }
-      
+
       // Also persist via REST API
-      await messageService.sendMessage(conversationId, messageText);
+      if (conversationId) {
+        await messageService.sendMessage(conversationId, messageText);
+      }
     } catch (error) {
       console.log('Error sending message:', error);
       // Message already shown optimistically, could add retry UI
