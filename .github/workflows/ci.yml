@@ -25,7 +25,7 @@ jobs:
         run: npm ci
 
       - name: Expo Doctor
-        run: npx expo-doctor --non-interactive
+        run: npx expo-doctor .
 
       - name: Typecheck
         run: npx tsc --noEmit
