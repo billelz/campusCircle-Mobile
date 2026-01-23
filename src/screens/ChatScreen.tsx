@@ -28,27 +28,42 @@ interface ChatScreenProps {
 }
 
 const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
-  const { conversationId, participantName, recipientUsername } = route.params;
+  const { conversationId, participantName, recipientUsername, recipientName } = route.params;
   const { user } = useAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
   const [loading, setLoading] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const [peerTyping, setPeerTyping] = useState(false);
+  const [activeConversationId, setActiveConversationId] = useState<string | undefined>(conversationId);
   const flatListRef = useRef<FlatList>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get the recipient username from route params or participantName
-  const recipient = recipientUsername || participantName;
+  const recipient = recipientUsername || recipientName || participantName;
 
   const fetchMessages = async () => {
     try {
-      const conversation = await messageService.getConversationById(conversationId);
-      if (conversation.messages?.length > 0) {
-        setMessages(conversation.messages);
+      if (activeConversationId) {
+        const conversation = await messageService.getConversationById(activeConversationId);
+        if (conversation.messages?.length > 0) {
+          setMessages(conversation.messages);
+        }
+        // Mark conversation as read
+        await messageService.markAsRead(activeConversationId);
+        return;
       }
-      // Mark conversation as read
-      await messageService.markAsRead(conversationId);
+
+      if (recipient) {
+        const conversation = await messageService.getConversationWith(recipient);
+        if (conversation) {
+          setActiveConversationId(conversation.id);
+          if (conversation.messages?.length > 0) {
+            setMessages(conversation.messages);
+          }
+          await messageService.markAsRead(conversation.id);
+        }
+      }
     } catch (error) {
       console.log('Error fetching messages:', error);
     } finally {
@@ -101,7 +116,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
         clearTimeout(typingTimeoutRef.current);
       }
     };
-  }, [conversationId, user?.username, handleWebSocketMessage, handleTypingIndicator]);
+  }, [activeConversationId, user?.username, handleWebSocketMessage, handleTypingIndicator, recipient]);
 
   const handleTextChange = (text: string) => {
     setInputText(text);
@@ -128,6 +143,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
   const handleSend = async () => {
     if (!inputText.trim() || !user) return;
+    if (!recipient && !activeConversationId) return;
 
     const messageText = inputText.trim();
     const newMessage: Message = {
@@ -152,9 +168,14 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
       if (websocketService.isConnected() && recipient) {
         websocketService.sendMessage(recipient, messageText);
       }
-      
+
       // Also persist via REST API
-      await messageService.sendMessage(conversationId, messageText);
+      if (activeConversationId) {
+        await messageService.sendMessage(activeConversationId, messageText);
+      } else if (recipient) {
+        const conversation = await messageService.sendMessageToUser(recipient, messageText);
+        setActiveConversationId(conversation.id);
+      }
     } catch (error) {
       console.log('Error sending message:', error);
       // Message already shown optimistically, could add retry UI
